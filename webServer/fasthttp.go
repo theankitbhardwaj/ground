@@ -2,13 +2,14 @@ package webServer
 
 import (
 	"fmt"
+	"net"
+	"strconv"
+
 	"github.com/fasthttp/router"
 	"github.com/techrail/ground/typs/appError"
 	"github.com/techrail/ground/utils"
 	"github.com/techrail/ground/webServer/middlewares"
 	"github.com/valyala/fasthttp"
-	"net"
-	"strconv"
 )
 
 const (
@@ -120,12 +121,12 @@ func (s *FastHttpServer) Start() appError.Typ {
 	} else {
 		listener, err = net.Listen("tcp4", ":"+strconv.Itoa(s.BindPort))
 	}
-	defer func(listener net.Listener) {
-		err := listener.Close()
-		if err != nil {
-			fmt.Printf("E#1MOCDG - Could not close listener. Error: %v", err)
-		}
-	}(listener)
+	// defer func(listener net.Listener) {
+	// 	err := listener.Close()
+	// 	if err != nil {
+	// 		fmt.Printf("E#1MOCDG - Could not close listener. Error: %v", err)
+	// 	}
+	// }(listener)
 
 	if err != nil {
 		return appError.NewError(
@@ -165,6 +166,9 @@ func (s *FastHttpServer) Start() appError.Typ {
 // stop will stop the server. It does so by setting the current state. The manager will notice the change
 // and stop the server gracefully
 // Important: The manager has to be adjusted to this behavior. Once done, export the function!
-func (s *FastHttpServer) stop() {
+func (s *FastHttpServer) Stop() {
+	fmt.Print("Shutdown requested...\n")
 	s.currentState = StateShutdownRequested
+	s.Server.Shutdown()
+	fmt.Print("\nShutdown completed...\n")
 }
